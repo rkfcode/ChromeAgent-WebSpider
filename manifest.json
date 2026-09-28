@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "WebSpider — AI Browser Agent",
+  "version": "8.0.0",
+  "description": "Professional resilient AI browser agent for research, automation, SEO, diagnostics and web workflows.",
+  "minimum_chrome_version": "114",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "activeTab",
+    "sidePanel",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open WebSpider"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "main.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": false,
+      "world": "MAIN"
+    }
+  ],
+  "commands": {
+    "open-webspider": {
+      "suggested_key": {
+        "default": "Alt+Shift+W"
+      },
+      "description": "Open WebSpider side panel"
+    }
+  },
+  "homepage_url": "https://github.com/rkfcode"
+}

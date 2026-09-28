@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-accent="amber" data-fs="md">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>WebSpider — AI Browser Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo"><img src="icon128.png" alt=""></div>
+      <div class="brandcopy">
+        <h1>WebSpider</h1>
+        <small id="tagline" data-i18n="tag">AI Browser Agent</small>
+      </div>
+      <div class="header-actions">
+        <button class="iconbtn" id="newChat" data-i18n-title="newChat" title="New chat" aria-label="New chat"><svg><use href="#i-plus"/></svg></button>
+        <button class="iconbtn" id="historyBtn" data-i18n-title="history" title="Chat history" aria-label="Chat history"><svg><use href="#i-history"/></svg></button>
+        <button class="iconbtn" id="themeBtn" data-i18n-title="toggleTheme" title="Toggle theme" aria-label="Toggle theme"><svg><use href="#i-moon"/></svg></button>
+        <button class="iconbtn lang" id="lang" data-i18n-title="language" title="Language" aria-label="Language">FA</button>
+        <button class="iconbtn" id="settings" data-i18n-title="settings" title="Settings" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+      </div>
+    </div>
+
+    <div class="statusbar" role="status" aria-live="polite">
+      <span id="dot" class="dot"></span>
+      <span id="status" data-i18n="ready">Ready</span>
+      <span class="livepulse" id="livePulse"></span>
+      <span class="chip hidden" id="progressChip">0/0</span>
+      <span class="chip model hidden" id="statusModel"></span>
+      <span class="elapsed hidden" id="elapsed">00:00</span>
+    </div>
+
+    <div class="modebar" role="group" aria-label="Agent mode">
+      <button class="mode active" data-mode="agent" aria-pressed="true" data-i18n-title="modeAgentTip" title="Act directly in the browser">
+        <svg><use href="#i-agent"/></svg><span data-i18n="modeAgent">Agent</span>
+      </button>
+      <button class="mode" data-mode="plan" aria-pressed="false" data-i18n-title="modePlanTip" title="Plan first, act after approval">
+        <svg><use href="#i-plan"/></svg><span data-i18n="modePlan">Plan</span>
+      </button>
+      <button class="mode" data-mode="research" aria-pressed="false" data-i18n-title="modeResearchTip" title="Read-only evidence gathering">
+        <svg><use href="#i-search"/></svg><span data-i18n="modeResearch">Research</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="thread">
+    <main class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions text">
+      <section class="welcome" id="welcome">
+        <div class="hero-icon"><svg><use href="#i-spider"/></svg></div>
+        <div class="eyebrow" data-i18n="eyebrow">BROWSER AUTOMATION ENGINE</div>
+        <h2 id="welcomeTitle" data-i18n="welcome">Give your browser a job.</h2>
+        <p id="welcomeText" data-i18n="desc">WebSpider can inspect pages, navigate, interact with forms, research, diagnose issues and recover from temporary AI/API failures.</p>
+        <div class="capabilities">
+          <span><svg><use href="#i-bolt"/></svg><em data-i18n="capFast">Fast actions</em></span>
+          <span><svg><use href="#i-shield"/></svg><em data-i18n="capSafe">Safe confirmations</em></span>
+          <span><svg><use href="#i-refresh"/></svg><em data-i18n="capFailover">Model failover</em></span>
+        </div>
+        <div class="quickgrid">
+          <button class="quick" data-prompt="Analyze this page and give me a concise professional report of its structure, UX, content and important issues.">
+            <svg><use href="#i-search"/></svg><span><b data-i18n="qAnalyze">Analyze page</b><small data-i18n="qAnalyzeSub">Structure + UX</small></span>
+          </button>
+          <button class="quick" data-prompt="Run a professional SEO audit on this page. Check title, meta, headings, canonical, links, images, structured data where available, and visible content. Report issues and fixes.">
+            <svg><use href="#i-chart"/></svg><span><b data-i18n="qSeo">SEO audit</b><small data-i18n="qSeoSub">Technical checks</small></span>
+          </button>
+          <button class="quick" data-prompt="Diagnose this page for broken UI, page errors, broken images, suspicious links, slow resources and common usability problems. Verify findings before reporting them.">
+            <svg><use href="#i-bug"/></svg><span><b data-i18n="qDiagnose">Diagnose</b><small data-i18n="qDiagnoseSub">Find browser issues</small></span>
+          </button>
+          <button class="quick" data-prompt="Research the important information on this page, extract evidence, compare what is visible, and give me a useful summary.">
+            <svg><use href="#i-book"/></svg><span><b data-i18n="qResearch">Research</b><small data-i18n="qResearchSub">Evidence-based</small></span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <button class="scrollfab hidden" id="scrollFab" data-i18n-title="toLatest" title="Jump to latest" aria-label="Jump to latest">
+      <svg><use href="#i-arrow-down"/></svg>
+    </button>
+  </div>
+
+  <div class="resume-card hidden" id="resumeCard">
+    <div class="resume-main">
+      <span class="resume-icon"><svg><use href="#i-play"/></svg></span>
+      <div class="resume-text"><b id="resumeTitle">A paused task is ready</b><small id="resumeSub">Continue from the last verified step.</small></div>
+    </div>
+    <div class="resume-actions">
+      <button class="ghost tiny" id="resumeDismiss" data-i18n-title="dismiss" title="Dismiss" aria-label="Dismiss"><svg><use href="#i-close"/></svg></button>
+      <button class="resumeBtn" id="resumeBtn" data-i18n-title="resume" title="Resume"><svg><use href="#i-play"/></svg><span data-i18n="resume">Resume</span></button>
+    </div>
+  </div>
+
+  <div class="composer">
+    <div class="composerbox">
+      <div class="composer-top">
+        <span class="composer-state"><span class="mini-dot" id="miniDot"></span><span id="composerState" data-i18n="ready">Ready</span></span>
+        <span class="composer-meta">
+          <span id="composerMode">Agent</span>
+        </span>
+      </div>
+      <textarea id="input" rows="1" data-i18n-ph="placeholder" placeholder="Example: audit this site, find SEO issues and prepare a report…" aria-label="Message"></textarea>
+      <div class="composerrow">
+        <button class="smallbtn" id="attachPage" data-i18n-title="pageTip" title="Attach a snapshot of the current page"><svg><use href="#i-page"/></svg><span data-i18n="page">Current page</span></button>
+        <button class="smallbtn" id="diagnoseBtn" data-i18n-title="diagnoseTip" title="Run a page diagnostic"><svg><use href="#i-bug"/></svg><span data-i18n="diagnose">Diagnose</span></button>
+        <span class="hint" id="hint" data-i18n="hint">Enter to send · Shift+Enter for new line</span>
+        <button class="stop hidden" id="stop"><svg><use href="#i-stop"/></svg><span data-i18n="stop">Pause</span></button>
+        <button class="run" id="run"><svg><use href="#i-play"/></svg><span data-i18n="run">Run</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ Settings drawer ══════════ -->
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="drawerinner">
+    <div class="drawerhead">
+      <div><h2 id="settingsTitle" data-i18n="settings">Settings</h2><small class="drawer-sub" data-i18n="settingsSub">Connection, behaviour and appearance</small></div>
+      <button class="iconbtn" id="close" data-i18n-title="close" title="Close" aria-label="Close"><svg><use href="#i-close"/></svg></button>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-tab="connection" aria-selected="true"><svg><use href="#i-plug"/></svg><span data-i18n="tabConnection">Connection</span></button>
+      <button class="tab" role="tab" data-tab="agent" aria-selected="false"><svg><use href="#i-agent"/></svg><span data-i18n="tabAgent">Agent</span></button>
+      <button class="tab" role="tab" data-tab="tools" aria-selected="false"><svg><use href="#i-tools"/></svg><span data-i18n="tabTools">Tools</span></button>
+      <button class="tab" role="tab" data-tab="appearance" aria-selected="false"><svg><use href="#i-palette"/></svg><span data-i18n="tabAppearance">Appearance</span></button>
+      <button class="tab" role="tab" data-tab="about" aria-selected="false"><svg><use href="#i-info"/></svg><span data-i18n="tabAbout">About</span></button>
+    </div>
+
+    <section class="tabpanel" data-panel="connection">
+      <div id="connection" class="connection">
+        <div class="conn-top">
+          <span class="conn-led"></span>
+          <div class="conn-copy">
+            <div class="title" id="connTitle" data-i18n="conn">Model connection</div>
+            <div class="sub" id="connSub" data-i18n="connIdle">Connect and WebSpider will discover healthy models automatically.</div>
+          </div>
+        </div>
+        <div class="conn-metrics">
+          <span id="connModel">—</span>
+          <span id="connLatency">—</span>
+        </div>
+        <button class="secondary tiny full" id="testConn"><svg><use href="#i-bolt"/></svg><span data-i18n="testConn">Test connection</span></button>
+      </div>
+
+      <div class="field">
+        <label for="endpoint" data-i18n="endpoint">Primary API base URL or endpoint</label>
+        <input id="endpoint" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false">
+        <small class="help" data-i18n="endpointHelp">OpenAI-compatible base URL. WebSpider resolves /chat/completions and /models from it.</small>
+      </div>
+
+      <div class="field">
+        <label for="fallbackEndpoints"><span data-i18n="fallback">Fallback endpoints</span> <em data-i18n="optional">(optional)</em></label>
+        <textarea id="fallbackEndpoints" class="compact" rows="2" placeholder="One endpoint per line" spellcheck="false"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="model" data-i18n="model">Default model</label>
+        <div class="modelrow">
+          <select id="model"><option value="">Discover verified models</option></select>
+          <button class="secondary tiny" id="refreshModels"><svg><use href="#i-refresh"/></svg><span data-i18n="check">Check</span></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="modelCustom" data-i18n="customModel">Or pin a model id manually</label>
+        <input id="modelCustom" placeholder="e.g. gpt-4o-mini" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <label for="apiKey" data-i18n="key">API key</label>
+        <div class="inputrow">
+          <input id="apiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false">
+          <button class="ghost tiny" id="toggleKey" data-i18n-title="showKey" title="Show / hide" aria-label="Show or hide key"><svg><use href="#i-eye"/></svg></button>
+        </div>
+      </div>
+
+      <label class="check"><input id="remember" type="checkbox" checked><span data-i18n="remember">Store the API key in Chrome storage</span></label>
+
+      <div class="row">
+        <button class="primary" id="save"><svg><use href="#i-save"/></svg><span data-i18n="save">Save &amp; test</span></button>
+        <button class="secondary" id="clear"><svg><use href="#i-trash"/></svg><span data-i18n="clear">Delete history</span></button>
+      </div>
+    </section>
+
+    <section class="tabpanel hidden" data-panel="agent">
+      <div class="row">
+        <div class="field"><label for="temperature" data-i18n="temp">Temperature</label><input id="temperature" type="number" min="0" max="2" step=".05" value=".15"></div>
+        <div class="field"><label for="maxSteps" data-i18n="maxSteps">Max agent steps</label><input id="maxSteps" type="number" min="5" max="100" step="1" value="40"></div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="requestTimeout" data-i18n="timeout">Request timeout</label>
+          <select id="requestTimeout">
+            <option value="10000">10s</option>
+            <option value="14000">14s</option>
+            <option value="18000" selected>18s</option>
+            <option value="25000">25s</option>
+            <option value="40000">40s</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="retryCount" data-i18n="retries">Retries per model</label>
+          <select id="retryCount">
+            <option value="0" selected data-i18n="retry0">Fail over immediately</option>
+            <option value="1" data-i18n="retry1">1 fast retry</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="check"><input id="streaming" type="checkbox" checked><span data-i18n="streaming">Stream answers as they are generated</span></label>
+      <label class="check"><input id="confirmRisk" type="checkbox" checked><span data-i18n="confirm">Ask before purchases, deletion, sending, submission or sensitive changes</span></label>
+      <label class="check"><input id="vision" type="checkbox" checked><span data-i18n="vision">Send screenshots when the selected model supports vision</span></label>
+      <label class="check"><input id="showThoughts" type="checkbox" checked><span data-i18n="showThoughts">Show the agent's interim reasoning notes</span></label>
+      <label class="check"><input id="sendOnEnter" type="checkbox" checked><span data-i18n="sendOnEnter">Enter sends the message (Shift+Enter makes a new line)</span></label>
+      <label class="check"><input id="notify" type="checkbox"><span data-i18n="notify">Notify me when a task finishes in the background</span></label>
+
+      <div class="section-title" data-i18n="rulesTitle">Agent rules</div>
+      <div class="field">
+        <label for="system" data-i18n="rules">Custom instructions</label>
+        <textarea id="system" rows="4" data-i18n-ph="rulesPh" placeholder="Example: always answer in English. Ask before irreversible actions."></textarea>
+      </div>
+
+      <div class="resilience">
+        <div class="resilience-head">
+          <svg><use href="#i-shield"/></svg>
+          <div><b data-i18n="resilientTitle">Resilient execution</b><small data-i18n="resilientSub">Transient API and network errors trigger a retry plus model failover while the task state is preserved.</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabpanel hidden" data-panel="tools">
+      <div class="section-title" data-i18n="speed">Execution speed</div>
+      <div class="segmented" id="speedSeg" role="group">
+        <button data-val="fast" data-i18n="speedFast">Fast</button>
+        <button data-val="balanced" data-i18n="speedBalanced">Balanced</button>
+        <button data-val="thorough" data-i18n="speedThorough">Thorough</button>
+      </div>
+      <small class="help" data-i18n="speedHelp">Fast minimises round trips. Thorough re-reads the page after every action.</small>
+
+      <label class="check"><input id="autoVerify" type="checkbox" checked><span data-i18n="autoVerify">Verify the page after each action</span></label>
+      <small class="help" data-i18n="autoVerifyHelp">Catches a click that silently did nothing instead of reporting success.</small>
+      <label class="check"><input id="cacheSnapshot" type="checkbox" checked><span data-i18n="cacheSnapshot">Reuse a recent page snapshot</span></label>
+      <label class="check"><input id="humanAssist" type="checkbox" checked><span data-i18n="humanAssist">Pause for CAPTCHA or human verification, then resume automatically</span></label>
+
+      <div class="field">
+        <label for="dialogPolicy" data-i18n="dialogPolicy">Native browser dialogs</label>
+        <select id="dialogPolicy">
+          <option value="record" data-i18n="dialogRecord">Show them (default)</option>
+          <option value="accept" data-i18n="dialogAccept">Auto-accept</option>
+          <option value="dismiss" data-i18n="dialogDismiss">Auto-dismiss</option>
+        </select>
+        <small class="help" data-i18n="dialogHelp">Only change this when an alert or confirm box is blocking an automated run.</small>
+      </div>
+
+      <div class="resilience">
+        <div class="resilience-head">
+          <svg><use href="#i-shield"/></svg>
+          <div><b data-i18n="safeTitle">Security controls stay in charge</b><small data-i18n="safeSub">WebSpider detects CAPTCHA and human-verification challenges, pauses and shows you the screen, then resumes the run automatically the moment you finish. It never solves or bypasses a challenge for you.</small></div>
+        </div>
+      </div>
+
+      <div class="section-title"><span data-i18n="toolsTitle">Built-in tools</span> <em id="toolsCount"></em></div>
+      <p class="help" data-i18n="toolsSub">Everything the agent can do on the page. Grouped by what it is allowed to do.</p>
+      <div class="tools-list" id="toolsList"></div>
+    </section>
+
+    <section class="tabpanel hidden" data-panel="appearance">
+      <div class="section-title" data-i18n="theme">Theme</div>
+      <div class="segmented" id="themeSeg" role="group">
+        <button data-val="dark" data-i18n="themeDark">Dark</button>
+        <button data-val="light" data-i18n="themeLight">Light</button>
+        <button data-val="system" data-i18n="themeSystem">System</button>
+      </div>
+
+      <div class="section-title" data-i18n="accent">Accent colour</div>
+      <div class="swatches" id="accentSeg" role="group">
+        <button data-val="amber" title="Amber" aria-label="Amber"><i style="background:#f2b03c"></i></button>
+        <button data-val="azure" title="Azure" aria-label="Azure"><i style="background:#57a3ff"></i></button>
+        <button data-val="violet" title="Violet" aria-label="Violet"><i style="background:#a78bfa"></i></button>
+        <button data-val="emerald" title="Emerald" aria-label="Emerald"><i style="background:#34d399"></i></button>
+      </div>
+
+      <div class="section-title" data-i18n="fontSize">Text size</div>
+      <div class="segmented" id="fsSeg" role="group">
+        <button data-val="sm" data-i18n="fontSm">Small</button>
+        <button data-val="md" data-i18n="fontMd">Default</button>
+        <button data-val="lg" data-i18n="fontLg">Large</button>
+      </div>
+
+      <div class="section-title" data-i18n="language">Language</div>
+      <div class="segmented" id="langSeg" role="group">
+        <button data-val="en">English</button>
+        <button data-val="fa">فارسی</button>
+      </div>
+
+      <div class="section-title" data-i18n="data">Data</div>
+      <div class="row">
+        <button class="secondary" id="resetUi"><svg><use href="#i-refresh"/></svg><span data-i18n="resetUi">Reset appearance</span></button>
+        <button class="secondary" id="clearState"><svg><use href="#i-trash"/></svg><span data-i18n="clearState">Clear agent state</span></button>
+      </div>
+      <button class="secondary full" id="exportAll"><svg><use href="#i-download"/></svg><span data-i18n="exportAll">Export all conversations</span></button>
+    </section>
+
+    <section class="tabpanel hidden" data-panel="about">
+      <div class="creator">
+        <div class="creator-id">
+          <div class="github-mark"><svg><use href="#i-github"/></svg></div>
+          <div><b>rkfcode</b><small data-i18n="creator">WebSpider creator</small></div>
+        </div>
+        <div class="creator-links">
+          <a href="https://github.com/rkfcode" target="_blank" rel="noreferrer noopener"><svg><use href="#i-github"/></svg>GitHub</a>
+          <a href="https://daramet.com/RKFi" target="_blank" rel="noreferrer noopener"><svg><use href="#i-heart"/></svg><span data-i18n="support">Support</span></a>
+          <a href="https://donatr.ee/rkfcode/" target="_blank" rel="noreferrer noopener"><svg><use href="#i-coin"/></svg>Crypto</a>
+        </div>
+      </div>
+      <div class="about-grid">
+        <div><span data-i18n="version">Version</span><b id="aboutVersion">7.0.0</b></div>
+        <div><span data-i18n="engine">Engine</span><b>MV3</b></div>
+      </div>
+      <p class="note" data-i18n="note">A browser extension cannot create internet access when the device is offline. WebSpider can retry requests and fail over between the endpoints you configure.</p>
+      <p class="font-note" data-i18n="fontNote">UI typography prioritises Vazirmatn / Vazir when available.</p>
+    </section>
+  </div>
+</aside>
+
+<!-- ══════════ History drawer ══════════ -->
+<aside class="drawer" id="historyDrawer" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+  <div class="drawerinner">
+    <div class="drawerhead">
+      <div><h2 id="historyTitle" data-i18n="history">Chat history</h2><small class="drawer-sub" data-i18n="historySub">Resume previous work</small></div>
+      <button class="iconbtn" id="historyClose" data-i18n-title="close" title="Close" aria-label="Close"><svg><use href="#i-close"/></svg></button>
+    </div>
+    <div class="row">
+      <button class="primary" id="newChat2"><svg><use href="#i-plus"/></svg><span data-i18n="newChat">New chat</span></button>
+      <button class="secondary" id="exportChat"><svg><use href="#i-download"/></svg><span data-i18n="exportChat">Export</span></button>
+      <button class="secondary" id="deleteHistory"><svg><use href="#i-trash"/></svg><span data-i18n="deleteAll">Delete all</span></button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</aside>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<div class="modal-wrap hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle"></h3>
+      <button class="iconbtn" data-modal-close data-i18n-title="close" title="Close" aria-label="Close"><svg><use href="#i-close"/></svg></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="secondary" id="modalCancel"></button>
+      <button class="primary" id="modalOk"></button>
+    </div>
+  </div>
+</div>
+
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 5v5h5M12 7v5l3 2"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/><path d="m19 13.5 1.4 1.1-1.7 3-1.7-.6a7.7 7.7 0 0 1-1.8 1l-.3 1.8h-3.4l-.3-1.8a7.7 7.7 0 0 1-1.8-1l-1.7.6-1.7-3L7.4 13a7.8 7.8 0 0 1 0-2l-1.4-1.1 1.7-3 1.7.6a7.7 7.7 0 0 1 1.8-1l.3-1.8h3.4l.3 1.8a7.7 7.7 0 0 1 1.8 1l1.7-.6 1.7 3-1.4 1.1a7.8 7.8 0 0 1 0 2Z"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-agent" viewBox="0 0 24 24"><path d="M7 8h10v9H7zM9 5h6M12 3v2M4 11h3M17 11h3M9 17v3M15 17v3"/><circle cx="10" cy="12" r="1"/><circle cx="14" cy="12" r="1"/></symbol>
+<symbol id="i-plan" viewBox="0 0 24 24"><path d="M6 4h12v16H6zM9 8h6M9 12h6M9 16h4"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 5 5"/></symbol>
+<symbol id="i-spider" viewBox="0 0 24 24"><circle cx="12" cy="11" r="4"/><path d="M8 9 4 6M8 12H3M8 15l-4 3M16 9l4-3M16 12h5M16 15l4 3M10 7 8 3M14 7l2-4"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-8 12h6l-1 8 8-12h-6z"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.5-2.8 8-7 10-4.2-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4L3 10M3 5v5h5M4 13a8 8 0 0 0 14.7 4L21 14M21 19v-5h-5"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-8M3 19h18"/></symbol>
+<symbol id="i-bug" viewBox="0 0 24 24"><path d="M9 7h6a3 3 0 0 1 3 3v5a6 6 0 0 1-12 0v-5a3 3 0 0 1 3-3Z"/><path d="M12 3v4M5 11H2M22 11h-3M6 6 4 4M18 6l2-2M6 16l-3 2M18 16l3 2"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22zM4 5.5v14A3.5 3.5 0 0 1 7.5 16H20"/></symbol>
+<symbol id="i-page" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v5h5M9 13h6M9 17h6"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m9 6 10 6-10 6z"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-2.8 17.6c.4.1.5-.2.5-.4v-1.6c-2 .4-2.4-1-2.4-1-.3-.9-.8-1.1-.8-1.1-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.8.9 2.2.7.1-.5.3-.9.5-1.1-1.6-.2-3.3-.8-3.3-3.6 0-.8.3-1.4.8-1.9-.1-.2-.4-1 .1-1.9 0 0 .7-.2 2.1.7a7.2 7.2 0 0 1 3.8 0c1.4-.9 2.1-.7 2.1-.7.5.9.2 1.7.1 1.9.5.5.8 1.1.8 1.9 0 2.8-1.7 3.4-3.3 3.6.3.3.5.7.5 1.3v2c0 .2.1.5.5.4A9 9 0 0 0 12 3Z"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.2-8.8 11-8.8 11S3.2 13.9 3.2 8.7A4.5 4.5 0 0 1 12 6.3a4.5 4.5 0 0 1 8.8 2.4Z"/></symbol>
+<symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5h4a2 2 0 0 1 0 4h-3a2 2 0 0 0 0 4h4"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></symbol>
+<symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v6M15 3v6M6 9h12v3a6 6 0 0 1-12 0zM12 18v3"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.6-.2-1-.6-1.4-.4-.4-.6-.8-.6-1.3 0-1 .8-1.8 1.8-1.8H16a5 5 0 0 0 5-5c0-3.6-4-6.5-9-6.5Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.5" r="1.2"/><circle cx="15" cy="8" r="1.2"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-tools" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 1 5 5L10 21l-4-4z"/><path d="m6 4 3 3-2 2-3-3zM4 14l3 3"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></symbol>
+</svg>
+
+<script src="sidepanel.js"></script>
+</body>
+</html>
