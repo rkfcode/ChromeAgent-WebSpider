@@ -17,7 +17,7 @@ your own API key.
 [![Chrome](https://img.shields.io/badge/Chrome-114%2B-4285F4?logo=googlechrome&logoColor=white)](#requirements)
 [![Tools](https://img.shields.io/badge/tools-45-0ea5e9)](#tools-the-agent-can-use)
 [![Tests](https://img.shields.io/badge/tests-661%20passing-16a34a)](#verification)
-[![Stars](https://img.shields.io/github/stars/rezakazemifathi/webspider?style=social)](https://github.com/rezakazemifathi/webspider/stargazers)
+[![Stars](https://img.shields.io/github/stars/rezakazemifathi/webspider?style=social)](https://github.com/rkfcode/ChromeAgent-WebSpider/stargazers)
 
 **English** · [فارسی](README.fa.md)
 
